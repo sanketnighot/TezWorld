@@ -46,12 +46,20 @@ jobs:
       #     GITHUB_JOB_NAME: "Code Built Successfully"
       #     GITHUB_JOB_STATUS: ${{ job.status }}
 
-      - name: Send Discord notification
-        uses: stegzilla/discord-notify@v2
+      # 3
+      # - name: Send Discord notification
+      #   uses: stegzilla/discord-notify@v2
+      #   with:
+      #     webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      #     title: New Code Pushed
+      #     message: test
+      #     include_image: true
+      #     avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+      #     username: Sanket
+
+      # 4
+      - name: Discord notification
+        uses: cl8dep/action-discord@v0
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: New Code Pushed
-          message: test
-          include_image: true
-          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
-          username: Sanket
+          webhook: ${{ secrets.DISCORD_WEBHOOK }}
+          message: 'Hello World'
