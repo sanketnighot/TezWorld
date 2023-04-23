@@ -50,8 +50,8 @@ jobs:
         uses: stegzilla/discord-notify@v2
         with:
           webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          title: ${{GITHUB_ACTION}}
-          message: "Code Built Successfully at ${{GITHUB_REPOSITORY}} by ${{GITHUB_ACTOR}" 
+          title: New Code Pushed
+          message: "Code Built Successfully " 
           include_image: true
           avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
           username: ${{ GITHUB_ACTOR }}
