@@ -26,5 +26,5 @@ jobs:
       - name: compile contracts
         uses: ecadlabs/taqueria-github-action@v0.13.0
         with:
-            compile_contracts: "dealer.py, player.py, tezcredits.py, board.py"
+            compile_contracts: "dealer.py, players.py, tezcredits.py, board.py"
             compile_plugin: smartpy
