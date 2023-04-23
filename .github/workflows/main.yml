@@ -23,12 +23,8 @@ jobs:
           npm update
           npm ci
 
-      - name: Taqueria compile
-        uses: ecadlabs/taqueria-github-action@v0.12.0
+      - name: compile contracts
+        uses: ecadlabs/taqueria-github-action@v0.13.0
         with:
-          plugins: '@taqueria/plugin-smartpy, @taqueria/plugin-jest, @taqueria/plugin-taquito'
-          compile_contracts: 'dealer.py, players.py, tezcredits.py, board.py'
-      
-      - name: Display Node.js version
-        run: |
-          node --version
+            compile_contracts: "dealer.py, player.py, tezcredits.py, board.py"
+            compile_plugin: smartpy
