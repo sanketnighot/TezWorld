@@ -1,0 +1,29 @@
+on: [push]
+
+concurrency: 
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tezworld-compile:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Setup repo
+        uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: install modules
+        run: |
+          npm update
+          npm ci
+
+      - name: Taqueria compile
+        uses: ecadlabs/taqueria-github-action@v0.12.0
+        with:
+          plugins: '@taqueria/plugin-smartpy, @taqueria/plugin-jest, @taqueria/plugin-taquito'
+          compile_contracts: 'dealer.py, players.py, tezcredits.py, board.py'
