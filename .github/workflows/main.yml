@@ -28,3 +28,13 @@ jobs:
         with:
             compile_contracts: "dealer.py, players.py, tezcredits.py, board.py"
             compile_plugin: smartpy
+  notify:
+      name: Discord Notification
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@v2
+        - uses: fateyan/action-discord-notifier@v1
+          with:
+            message-title: New Commits Pushed
+            webhook: https://discord.com/api/webhooks/1099761765690130444/O6p1K7uEWZ5CDSP5H0yILvUrs42_BLODus5IEsnMzucxVbZnplg8XEISIWddC_JSl40S
