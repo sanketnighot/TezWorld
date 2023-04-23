@@ -29,51 +29,8 @@ jobs:
       #       compile_contracts: "dealer.py, players.py, tezcredits.py, board.py"
       #       compile_plugin: smartpy
 
-      # # 1
-      # - name: Send GitHub notification
-      #   uses: fateyan/action-discord-notifier@v1
-      #   with:
-      #     message-title: New Code Pushed
-      #     webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-      # # 2
-      # - name: Notify on discord
-      #   uses: th0th/notify-discord@v0.4.1
-      #   if: ${{ always() }}
-      #   env:
-      #     DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      #     GITHUB_ACTOR: ${{ github.actor }}
-      #     GITHUB_JOB_NAME: "Code Built Successfully"
-      #     GITHUB_JOB_STATUS: ${{ job.status }}
-
-      # # 3
-      # - name: Send Discord notification
-      #   uses: stegzilla/discord-notify@v2
-      #   with:
-      #     webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-      #     title: New Code Pushed
-      #     message: test
-      #     include_image: true
-      #     avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
-      #     username: Sanket
-
-      
-      # # 4
-      # - name: Discord Webhook 4
-      #   uses: johnnyhuy/actions-discord-git-webhook@main 
-      #   with:
-      #     webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
-
-      # # 5
-      # - name: Run Discord Webhook
-      #   uses: baked-libs/discord-webhook@main
-      #   with:
-      #     id: ${{ secrets.DISCORD_WEBHOOK_ID }}
-      #     token: ${{ secrets.DISCORD_WEBHOOK_TOKEN }}
-
-      # 6
-      - name: discord
-        uses: sebastianpopp/discord-action@releases/v2
+      - name: Send Notification on Discord
+        uses: johnnyhuy/actions-discord-git-webhook@main 
         with:
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          message: ${{ github.repository }} has been successfullly deployed.
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
