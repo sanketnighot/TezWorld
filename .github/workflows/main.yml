@@ -29,17 +29,29 @@ jobs:
             compile_contracts: "dealer.py, players.py, tezcredits.py, board.py"
             compile_plugin: smartpy
 
-      - name: Send GitHub notification
-        uses: fateyan/action-discord-notifier@v1
-        with:
-          message-title: New Code Pushed
-          webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      # 1
+      # - name: Send GitHub notification
+      #   uses: fateyan/action-discord-notifier@v1
+      #   with:
+      #     message-title: New Code Pushed
+      #     webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
 
-      - name: Notify on discord
-        uses: th0th/notify-discord@v0.4.1
-        if: ${{ always() }}
-        env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-          GITHUB_ACTOR: ${{ github.actor }}
-          GITHUB_JOB_NAME: "Code Built Successfully"
-          GITHUB_JOB_STATUS: ${{ job.status }}
+      # 2
+      # - name: Notify on discord
+      #   uses: th0th/notify-discord@v0.4.1
+      #   if: ${{ always() }}
+      #   env:
+      #     DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      #     GITHUB_ACTOR: ${{ github.actor }}
+      #     GITHUB_JOB_NAME: "Code Built Successfully"
+      #     GITHUB_JOB_STATUS: ${{ job.status }}
+
+      - name: Send Discord notification
+        uses: stegzilla/discord-notify@v2
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          title: New Code Commiter
+          message: "**${{ github.event.push.title }}**\n**Creator:** ${{ github.event.push.user.login }}\n${{ github.event.push.html_url }}"
+          include_image: true
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          username: ${{ github.actor }}
