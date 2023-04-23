@@ -29,4 +29,5 @@ jobs:
           compile_contracts: 'dealer.py, players.py, tezcredits.py, board.py'
       
       - name: Display Node.js version
-          run: node --version
+        run: |
+          node --version
