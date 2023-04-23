@@ -59,7 +59,7 @@ jobs:
 
       # 4
       - name: Discord notification
-        uses: cl8dep/action-discord@v0
+        uses: cl8dep/action-discord@v1
         with:
           webhook: ${{ secrets.DISCORD_WEBHOOK_URL }}
           message: 'Hello World 4'
