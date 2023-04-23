@@ -73,7 +73,7 @@ class Dealer(sp.Contract):
                     sp.TRecord(
                         current_player=sp.TNat,
                         current_game_action=game_action_type,
-                        # deadline_for_action=sp.TTimestamp,
+                        # deadline_for_action=sp.TTimestamp, 
                     )
                 ),
             )
