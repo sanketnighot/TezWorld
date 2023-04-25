@@ -2,7 +2,8 @@ import smartpy as sp  # type: ignore
 
 Address = sp.io.import_script_from_url("file:contracts/utils/address.py")
 Errors = sp.io.import_script_from_url("file:contracts/utils/errors.py")
-
+GameActions = sp.io.import_script_from_url("file:contracts/utils/game_actions.py")
+Helpers = sp.io.import_script_from_url("file:contracts/utils/helpers.py")
 
 game_status_type = sp.TVariant(
     not_started=sp.TUnit,
@@ -20,7 +21,7 @@ game_action_type = sp.TVariant(dice_roll=sp.TUnit, await_player_action=sp.TUnit)
 
 
 # ~ Dealer Contract ~
-class Dealer(sp.Contract):
+class Dealer(GameActions.GameActions, Helpers.Helpers):
     def __init__(
         self,
         _stakeholders,
@@ -49,6 +50,7 @@ class Dealer(sp.Contract):
             minimum_players=sp.nat(2),
             maximum_players=sp.nat(8),
             game_instance=sp.none,
+            time_per_turn=sp.int(60),
         )
         self.init_type(
             sp.TRecord(
@@ -73,46 +75,14 @@ class Dealer(sp.Contract):
                     sp.TRecord(
                         current_player=sp.TNat,
                         current_game_action=game_action_type,
-                        # deadline_for_action=sp.TTimestamp, 
+                        deadline_for_action=sp.TTimestamp,
                     )
                 ),
+                time_per_turn=sp.TInt,
             )
         )
-
-    def is_stakeholder(self):
-        """
-        This function verifies if the sender is a stakeholder in the smart contract.
-        """
-        sp.verify(self.data.stakeholders.contains(sp.sender), Errors.NotStakeholder)
-
-    def update_current_player(self):
-        """
-        This function updates the current player in a game instance.
-        """
-        sp.verify(self.data.game_instance != sp.none, Errors.InvalidGameInstance)
-        current_game_instance = sp.local(
-            "current_game_instance", self.data.game_instance.open_some()
-        )
-        current_player_id = sp.local(
-            "current_player_id", current_game_instance.value.current_player
-        )
-        with sp.if_(current_player_id.value == self.data.total_players):
-            current_game_instance.value.current_player = sp.nat(0)
-        with sp.else_():
-            current_game_instance.value.current_player = (
-                current_player_id.value + sp.nat(1)
-            )
-
-    def move_player_position(self, player_id, dice_number):
-        fst, snd = sp.match_pair(dice_number)
-        with sp.if_(fst != snd):
-            self.update_current_player()
-            self.data.player_ledger[player_id].doubles_on_dice = sp.nat(0)
-        with sp.else_():
-            self.data.player_ledger[player_id].doubles_on_dice += sp.nat(1)
-        self.data.player_ledger[player_id].current_position = (
-            self.data.player_ledger[player_id].current_position + fst + snd
-        ) % 40
+        GameActions.GameActions.__init__(self)
+        Helpers.Helpers.__init__(self)
 
     @sp.entry_point
     def update_game_status(self, new_game_status):
@@ -136,6 +106,7 @@ class Dealer(sp.Contract):
                 sp.record(
                     current_player=sp.nat(0),
                     current_game_action=sp.variant("dice_roll", sp.unit),
+                    deadline_for_action=(sp.now).add_seconds(self.data.time_per_turn),
                 )
             )
         self.data.game_status = new_game_status
@@ -223,24 +194,42 @@ class Dealer(sp.Contract):
     def roll_dice(self, player_id, dice_number):
         sp.set_type(player_id, sp.TNat)
         sp.set_type(dice_number, sp.TPair(sp.TNat, sp.TNat))
-        sp.verify_equal(
-            player_id,
-            self.data.game_instance.open_some().current_player,
-            Errors.NotYourTurn,
+        self.is_player(player_id)
+        sp.verify(
+            self.data.game_instance.open_some().current_game_action
+            == sp.variant("dice_roll", sp.unit),
+            Errors.InvalidAction,
         )
-        player_address = sp.view(
-            "get_player", self.data.players_contract, player_id, t=sp.TAddress
-        ).open_some("Error: Unable to get player address")
-        sp.verify(sp.sender == player_address, Errors.InvalidPlayerId)
         # TODO: Implement dice roll logic and remove dice_number parameter and its logic
         self.move_player_position(player_id, dice_number)
-        current_game_instance = sp.local(
-            "current_game_instance", self.data.game_instance.open_some()
+        self.update_game_action(sp.variant("await_player_action", sp.unit))
+
+    @sp.entry_point
+    def take_action(self, player_id, action):
+        self.is_player(player_id)
+        sp.verify(
+            self.data.game_instance.open_some().current_game_action
+            == sp.variant("await_player_action", sp.unit),
+            Errors.InvalidAction,
         )
-        current_game_instance.value.current_game_action = sp.variant(
-            "dice_roll", sp.unit
-        )
-        self.data.game_instance = sp.some(current_game_instance.value)
+        sp.set_type(action, GameActions.player_action_type)
+        with sp.if_(action.is_variant("land_on_owned_property")):
+            self.land_on_owned_property(action)
+        with sp.if_(action.is_variant("land_on_unowned_property")):
+            self.land_on_unowned_property(action)
+        with sp.if_(action.is_variant("land_on_go")):
+            self.land_on_go(action)
+        with sp.if_(action.is_variant("land_on_go_to_jail")):
+            self.land_on_go_to_jail(action)
+        with sp.if_(action.is_variant("land_on_tax_space")):
+            self.land_on_tax_space(action)
+        with sp.if_(action.is_variant("land_on_chance")):
+            self.land_on_chance(action)
+        with sp.if_(action.is_variant("land_on_community_chest")):
+            self.land_on_community_chest(action)
+        with sp.if_(action.is_variant("land_on_free_parking")):
+            self.land_on_free_parking(action)
+        self.update_game_action(sp.variant("dice_roll", sp.unit))
 
 
 sp.add_compilation_target(

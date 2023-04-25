@@ -181,6 +181,11 @@ if __name__ == "__main__":
         )
 
         sc.h1("Player 1 rolls the dice")
-        sc += dealer.roll_dice(player_id = sp.nat(0), dice_number = sp.pair(sp.nat(40), sp.nat(1))).run(sender = Address.alice)
-        sc += dealer.roll_dice(player_id = sp.nat(0), dice_number = sp.pair(sp.nat(3), sp.nat(5))).run(sender = Address.alice)
-        
+        sc += dealer.roll_dice(
+            player_id=sp.nat(0), dice_number=sp.pair(sp.nat(4), sp.nat(1))
+        ).run(sender=Address.alice)
+
+        sc.h1("Player 1 takes action")
+        sc += dealer.take_action(
+            player_id=sp.nat(0), action=sp.variant("land_on_unowned_property", sp.unit)
+        ).run(sender=Address.alice)

@@ -35,3 +35,5 @@ InvalidGameInstance = make("Invalid_Game_Instance")
 NotYourTurn = make("Not_Your_Turn")
 
 InvalidPlayerId = make("Invalid_Player_Id")
+
+InvalidAction = make("Invalid_Action")
