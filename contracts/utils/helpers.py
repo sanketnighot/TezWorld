@@ -13,10 +13,13 @@ class Helpers(sp.Contract):
         """
         sp.verify(self.data.stakeholders.contains(sp.sender), Errors.NotStakeholder)
 
+    def is_current_player(self, player_id):
+        sp.verify_equal(player_id, self.data.current_player, Errors.NotYourTurn)
+
     def is_player(self, player_id):
         sp.verify_equal(
             player_id,
-            self.data.game_instance.open_some().current_player,
+            self.data.current_player,
             Errors.NotYourTurn,
         )
         player_address = sp.view(
@@ -28,45 +31,13 @@ class Helpers(sp.Contract):
         """
         This function updates the current player in a game instance.
         """
-        sp.verify(self.data.game_instance != sp.none, Errors.InvalidGameInstance)
-        current_game_instance = sp.local(
-            "current_game_instance", self.data.game_instance.open_some()
-        )
-        current_player_id = sp.local(
-            "current_player_id", current_game_instance.value.current_player
-        )
         with sp.if_(
-            current_game_instance.value.current_game_action
-            == sp.variant("await_player_action", sp.unit)
+            self.data.player_ledger[self.data.current_player].doubles_on_dice == 0
         ):
-            with sp.if_(current_player_id.value == self.data.total_players):
-                current_game_instance.value.current_player = sp.nat(0)
+            with sp.if_(self.data.current_player == abs(self.data.total_players - 1)):
+                self.data.current_player = sp.nat(0)
             with sp.else_():
-                current_game_instance.value.current_player = (
-                    current_player_id.value + sp.nat(1)
-                )
-        sp.trace(sp.some(current_game_instance.value))
-        self.data.game_instance = sp.some(current_game_instance.value)
-
-    def update_game_action(self, game_action):
-        current_game_instance_ = sp.local(
-            "current_game_instance_", self.data.game_instance.open_some()
-        )
-        with sp.if_(game_action == sp.variant("dice_roll", sp.unit)):
-            current_game_instance_.value = sp.record(
-                current_player=current_game_instance_.value.current_player,
-                current_game_action=game_action,
-                deadline_for_action=(sp.now).add_seconds(self.data.time_per_turn),
-            )
-
-        with sp.if_(game_action == sp.variant("await_player_action", sp.unit)):
-            current_game_instance_.value = sp.record(
-                current_player=current_game_instance_.value.current_player,
-                current_game_action=game_action,
-                deadline_for_action=(sp.now).add_seconds(self.data.time_per_turn),
-            )
-            self.update_current_player()
-        self.data.game_instance = sp.some(current_game_instance_.value)
+                self.data.current_player += sp.nat(1)
 
     def move_player_position(self, player_id, dice_number):
         fst, snd = sp.match_pair(dice_number)

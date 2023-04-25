@@ -4,6 +4,7 @@ Address = sp.io.import_script_from_url("file:contracts/utils/address.py")
 Errors = sp.io.import_script_from_url("file:contracts/utils/errors.py")
 GameActions = sp.io.import_script_from_url("file:contracts/utils/game_actions.py")
 Helpers = sp.io.import_script_from_url("file:contracts/utils/helpers.py")
+spaces = sp.io.import_script_from_url("file:contracts/utils/board_spaces.py").Spaces
 
 game_status_type = sp.TVariant(
     not_started=sp.TUnit,
@@ -43,13 +44,14 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
                     current_position=sp.TNat,
                     player_status=player_status_type,
                     doubles_on_dice=sp.TNat,
+                    current_game_action=game_action_type,
                 ),
             ),
+            current_player=sp.nat(0),
             game_status=_game_status,
             game_fees=_game_fees,
             minimum_players=sp.nat(2),
             maximum_players=sp.nat(8),
-            game_instance=sp.none,
             time_per_turn=sp.int(60),
         )
         self.init_type(
@@ -65,19 +67,14 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
                         current_position=sp.TNat,
                         player_status=player_status_type,
                         doubles_on_dice=sp.TNat,
+                        current_game_action=game_action_type,
                     ),
                 ),
+                current_player=sp.TNat,
                 game_status=game_status_type,
                 game_fees=sp.TMutez,
                 minimum_players=sp.TNat,
                 maximum_players=sp.TNat,
-                game_instance=sp.TOption(
-                    sp.TRecord(
-                        current_player=sp.TNat,
-                        current_game_action=game_action_type,
-                        deadline_for_action=sp.TTimestamp,
-                    )
-                ),
                 time_per_turn=sp.TInt,
             )
         )
@@ -100,14 +97,6 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
             sp.verify(
                 self.data.total_players >= self.data.minimum_players,
                 Errors.NotMinimumPlayers,
-            )
-        with sp.if_(new_game_status == sp.variant("on_going", sp.unit)):
-            self.data.game_instance = sp.some(
-                sp.record(
-                    current_player=sp.nat(0),
-                    current_game_action=sp.variant("dice_roll", sp.unit),
-                    deadline_for_action=(sp.now).add_seconds(self.data.time_per_turn),
-                )
             )
         self.data.game_status = new_game_status
         sp.emit(sp.record(new_game_status=new_game_status, tag="GAME_STATUS_UPDATED"))
@@ -181,6 +170,7 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
             current_position=sp.nat(0),
             player_status=sp.variant("active", sp.unit),
             doubles_on_dice=sp.nat(0),
+            current_game_action=sp.variant("dice_roll", sp.unit),
         )
         self.data.total_players += sp.nat(1)
 
@@ -195,20 +185,31 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
         sp.set_type(player_id, sp.TNat)
         sp.set_type(dice_number, sp.TPair(sp.TNat, sp.TNat))
         self.is_player(player_id)
+        self.is_current_player(player_id)
         sp.verify(
-            self.data.game_instance.open_some().current_game_action
+            self.data.player_ledger[player_id].current_game_action
             == sp.variant("dice_roll", sp.unit),
             Errors.InvalidAction,
         )
         # TODO: Implement dice roll logic and remove dice_number parameter and its logic
         self.move_player_position(player_id, dice_number)
-        self.update_game_action(sp.variant("await_player_action", sp.unit))
+        self.data.player_ledger[player_id].current_game_action = sp.variant(
+            "await_player_action", sp.unit
+        )
 
     @sp.entry_point
     def take_action(self, player_id, action):
+        # TODO: Check if action aligns with the players position
         self.is_player(player_id)
+        self.is_current_player(player_id)
         sp.verify(
-            self.data.game_instance.open_some().current_game_action
+            spaces[
+                self.data.player_ledger[player_id].current_position
+            ].related_action.contains(action),
+            Errors.InvalidAction,
+        )
+        sp.verify(
+            self.data.player_ledger[player_id].current_game_action
             == sp.variant("await_player_action", sp.unit),
             Errors.InvalidAction,
         )
@@ -229,7 +230,13 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
             self.land_on_community_chest(action)
         with sp.if_(action.is_variant("land_on_free_parking")):
             self.land_on_free_parking(action)
-        self.update_game_action(sp.variant("dice_roll", sp.unit))
+        self.data.player_ledger[player_id].current_game_action = sp.variant(
+            "await_player_action", sp.unit
+        )
+        self.data.player_ledger[player_id].current_game_action = sp.variant(
+            "dice_roll", sp.unit
+        )
+        self.update_current_player()
 
 
 sp.add_compilation_target(

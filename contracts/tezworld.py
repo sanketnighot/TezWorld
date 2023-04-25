@@ -187,5 +187,35 @@ if __name__ == "__main__":
 
         sc.h1("Player 1 takes action")
         sc += dealer.take_action(
-            player_id=sp.nat(0), action=sp.variant("land_on_unowned_property", sp.unit)
+            player_id=sp.nat(0), action=sp.variant("land_on_tax_space", sp.unit)
         ).run(sender=Address.alice)
+
+        sc.h1("Player 2 rolls the dice")
+        sc += dealer.roll_dice(
+            player_id=sp.nat(1), dice_number=sp.pair(sp.nat(1), sp.nat(1))
+        ).run(sender=Address.bob)
+
+        sc.h1("Player 2 takes action")
+        sc += dealer.take_action(
+            player_id=sp.nat(1), action=sp.variant("land_on_unowned_property", sp.unit)
+        ).run(sender=Address.bob)
+        
+        sc.h1("Player 2 rolls the dice")
+        sc += dealer.roll_dice(
+            player_id=sp.nat(1), dice_number=sp.pair(sp.nat(2), sp.nat(2))
+        ).run(sender=Address.bob)
+
+        sc.h1("Player 2 takes action")
+        sc += dealer.take_action(
+            player_id=sp.nat(1), action=sp.variant("land_on_owned_property", sp.unit)
+        ).run(sender=Address.bob)
+        
+        sc.h1("Player 2 rolls the dice")
+        sc += dealer.roll_dice(
+            player_id=sp.nat(1), dice_number=sp.pair(sp.nat(4), sp.nat(1))
+        ).run(sender=Address.bob)
+
+        sc.h1("Player 2 takes action")
+        sc += dealer.take_action(
+            player_id=sp.nat(1), action=sp.variant("land_on_go", sp.unit)
+        ).run(sender=Address.bob)
