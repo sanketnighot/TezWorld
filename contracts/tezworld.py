@@ -24,18 +24,27 @@ if __name__ == "__main__":
         )
         sc += players
 
+    @sp.add_test("AssetsContract")
+    def test():
+        sc = sp.test_scenario()
+        sc.h1("TezWorld: Properties Contract (NFT Contract)")
+        sc.table_of_contents()
+
+        assets = assets_contract.Assets(
+            admin=Address.admin,
+            metadata=sp.utils.metadata_of_url(
+                "ipfs://QmW8jPMdBmFvsSEoLWPPhaozN6jGQFxxkwuMLtVFqEy6Fb"
+            ),
+        )
+        sc += assets
+
         sc.h1("Mint Player Cards")
         metadata = sp.pack(
             "ipfs://bafyreibwl5hhjgrat5l7cmjlv6ppwghm6ijygpz2xor2r6incfcxnl7y3e/metadata.json"
         )
-        sc += players.mint([sp.record(to_=Address.admin, metadata={"": metadata})]).run(
-            sender=Address.admin
-        )
-
-        sc.h1("Burn Player Cards")
-        sc += players.burn([sp.record(amount=1, from_=Address.admin, token_id=0)]).run(
-            sender=Address.admin
-        )
+        sc += assets.mint(
+            metadata={"": metadata}, to=Address.admin, token_id=sp.nat(20)
+        ).run(sender=Address.admin)
 
     @sp.add_test("DealerContract")
     def test():
@@ -102,6 +111,14 @@ if __name__ == "__main__":
         )
         sc.register(players)
 
+        assets = assets_contract.Assets(
+            admin=Address.admin,
+            metadata=sp.utils.metadata_of_url(
+                "ipfs://QmW8jPMdBmFvsSEoLWPPhaozN6jGQFxxkwuMLtVFqEy6Fb"
+            ),
+        )
+        sc.register(assets)
+
         token_metadata = {"name": "TzCredits", "symbol": "TZC", "decimals": "6"}
         tzc = tezcredits_contract.TezCredits(
             Address.admin,  # Update the admin Addressess before deployement to the chain.
@@ -116,9 +133,7 @@ if __name__ == "__main__":
         dealer = dealer_contract.Dealer(
             _stakeholders=sp.set([Address.admin]),
             _tezcredits_contract=tzc.address,
-            _properties_and_utilities_contract=sp.address(
-                "KT1propertiesandutilitiescontract"
-            ),
+            _properties_and_utilities_contract=assets.address,
             _players_contract=players.address,
             _game_status=sp.variant("not_started", sp.unit),
             _game_fees=sp.tez(1500),
@@ -135,12 +150,23 @@ if __name__ == "__main__":
         )
         sc.register(board)
 
+        sc += tzc.setAdministrator(dealer.address).run(sender=Address.admin, show=False)
+        sc += assets.set_administrator(dealer.address).run(
+            sender=Address.admin, show=False
+        )
+        sc += players.set_administrator(dealer.address).run(
+            sender=Address.admin, show=False
+        )
+
         sc.h1("Initial Storage of all Contracts")
 
         sc.h2("Players Contract")
         sc.show(
             sp.record(contract_address=players.address, initial_storage=players.data)
         )
+
+        sc.h2("Assets Contract")
+        sc.show(sp.record(contract_address=assets.address, initial_storage=assets.data))
 
         sc.h2("Dealer Contract")
         sc.show(sp.record(contract_address=dealer.address, initial_storage=dealer.data))
@@ -150,11 +176,6 @@ if __name__ == "__main__":
 
         sc.h2("Board Contract")
         sc.show(sp.record(contract_address=board.address, initial_storage=board.data))
-
-        sc += players.set_administrator(dealer.address).run(
-            sender=Address.admin, show=False
-        )
-        sc += tzc.setAdministrator(dealer.address).run(sender=Address.admin, show=False)
 
         sc.h1("Register Player")
         metadata = sp.pack(
@@ -187,7 +208,8 @@ if __name__ == "__main__":
 
         sc.h1("Player 1 takes action")
         sc += dealer.take_action(
-            player_id=sp.nat(0), action=sp.variant("land_on_tax_space", sp.unit)
+            player_id=sp.nat(0),
+            action=sp.variant("land_on_unowned_property", sp.bool(False)),
         ).run(sender=Address.alice)
 
         sc.h1("Player 2 rolls the dice")
@@ -197,9 +219,9 @@ if __name__ == "__main__":
 
         sc.h1("Player 2 takes action")
         sc += dealer.take_action(
-            player_id=sp.nat(1), action=sp.variant("land_on_unowned_property", sp.unit)
+            player_id=sp.nat(1), action=sp.variant("land_on_community_chest", sp.unit)
         ).run(sender=Address.bob)
-        
+
         sc.h1("Player 2 rolls the dice")
         sc += dealer.roll_dice(
             player_id=sp.nat(1), dice_number=sp.pair(sp.nat(2), sp.nat(2))
@@ -209,10 +231,10 @@ if __name__ == "__main__":
         sc += dealer.take_action(
             player_id=sp.nat(1), action=sp.variant("land_on_owned_property", sp.unit)
         ).run(sender=Address.bob)
-        
+
         sc.h1("Player 2 rolls the dice")
         sc += dealer.roll_dice(
-            player_id=sp.nat(1), dice_number=sp.pair(sp.nat(4), sp.nat(1))
+            player_id=sp.nat(1), dice_number=sp.pair(sp.nat(3), sp.nat(1))
         ).run(sender=Address.bob)
 
         sc.h1("Player 2 takes action")

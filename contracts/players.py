@@ -10,12 +10,13 @@ class Players(
     def __init__(self, admin, **kwargs):
         FA2.Fa2Nft.__init__(self, **kwargs)
         FA2.Admin.__init__(self, admin)
-    
+
     @sp.onchain_view()
     def get_player(self, player_id):
         sp.set_type(player_id, sp.TNat)
         player_address = self.data.ledger[player_id]
         sp.result(player_address)
+
 
 sp.add_compilation_target(
     "Compiled_Players_Contract",

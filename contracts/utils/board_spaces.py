@@ -22,15 +22,26 @@ Categories = {
     "jail": "jail",
 }
 
+player_action_type = sp.TVariant(
+    land_on_owned_property=sp.TUnit,
+    land_on_unowned_property=sp.TUnit,
+    land_on_go=sp.TUnit,
+    land_on_go_to_jail=sp.TUnit,
+    land_on_tax_space=sp.TUnit,
+    land_on_chance=sp.TUnit,
+    land_on_community_chest=sp.TUnit,
+    land_on_free_parking=sp.TUnit,
+)
+
 
 Spaces = sp.big_map(
     l={
-        1: sp.record(
+        0: sp.record(
             name="go",
             category=Categories["go"],
             related_action=sp.set([sp.variant("land_on_go", sp.unit)]),
         ),
-        2: sp.record(
+        1: sp.record(
             name="Mediterranean Avenue",
             category=Categories["property_a"],
             related_action=sp.set([
@@ -38,12 +49,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        3: sp.record(
+        2: sp.record(
             name="Community Chest",
             category=Categories["community_chest"],
             related_action=sp.set([sp.variant("land_on_community_chest", sp.unit)]),
         ),
-        4: sp.record(
+        3: sp.record(
             name="Baltic Avenue",
             category=Categories["property_a"],
             related_action=sp.set([
@@ -51,12 +62,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        5: sp.record(
+        4: sp.record(
             name="Income tax",
             category=Categories["tax"],
             related_action=sp.set([sp.variant("land_on_tax_space", sp.unit)]),
         ),
-        6: sp.record(
+        5: sp.record(
             name="Reading Railroad",
             category=Categories["utility"],
             related_action=sp.set([
@@ -64,7 +75,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        7: sp.record(
+        6: sp.record(
             name="Oriental Avenue",
             category=Categories["property_b"],
             related_action=sp.set([
@@ -72,12 +83,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        8: sp.record(
+        7: sp.record(
             name="chance",
             category=Categories["chance"],
             related_action=sp.set([sp.variant("land_on_chance", sp.unit)]),
         ),
-        9: sp.record(
+        8: sp.record(
             name="Vermont Avenue",
             category=Categories["property_b"],
             related_action=sp.set([
@@ -85,7 +96,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        10: sp.record(
+        9: sp.record(
             name="Connecticut Avenue",
             category=Categories["property_b"],
             related_action=sp.set([
@@ -93,12 +104,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        11: sp.record(
+        10: sp.record(
             name="jail",
             category=Categories["jail"],
             related_action=sp.set([sp.variant("land_on_go", sp.unit)]),
         ),
-        12: sp.record(
+        11: sp.record(
             name="St. Charles Place",
             category=Categories["property_c"],
             related_action=sp.set([
@@ -106,7 +117,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        13: sp.record(
+        12: sp.record(
             name="Electric Company",
             category=Categories["utility"],
             related_action=sp.set([
@@ -114,7 +125,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        14: sp.record(
+        13: sp.record(
             name="States Avenue",
             category=Categories["property_c"],
             related_action=sp.set([
@@ -122,7 +133,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        15: sp.record(
+        14: sp.record(
             name="Virginia Avenue",
             category=Categories["property_c"],
             related_action=sp.set([
@@ -130,7 +141,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        16: sp.record(
+        15: sp.record(
             name="Pennsylvania utility",
             category=Categories["utility"],
             related_action=sp.set([
@@ -138,7 +149,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        17: sp.record(
+        16: sp.record(
             name="St. James Place",
             category=Categories["property_d"],
             related_action=sp.set([
@@ -146,12 +157,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        18: sp.record(
+        17: sp.record(
             name="Community Chest",
             category=Categories["community_chest"],
             related_action=sp.set([sp.variant("land_on_community_chest", sp.unit)]),
         ),
-        19: sp.record(
+        18: sp.record(
             name="Tennessee Avenue",
             category=Categories["property_d"],
             related_action=sp.set([
@@ -159,7 +170,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        20: sp.record(
+        19: sp.record(
             name="New York Avenue",
             category=Categories["property_d"],
             related_action=sp.set([
@@ -167,12 +178,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        21: sp.record(
+        20: sp.record(
             name="Free Parking",
             category=Categories["free_parking"],
             related_action=sp.set([sp.variant("land_on_free_parking", sp.unit)]),
         ),
-        22: sp.record(
+        21: sp.record(
             name="Kentucky Avenue",
             category=Categories["property_e"],
             related_action=sp.set([
@@ -180,12 +191,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        23: sp.record(
+        22: sp.record(
             name="chance",
             category=Categories["chance"],
             related_action=sp.set([sp.variant("land_on_chance", sp.unit)]),
         ),
-        24: sp.record(
+        23: sp.record(
             name="Indiana Avenue",
             category=Categories["property_e"],
             related_action=sp.set([
@@ -193,7 +204,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        25: sp.record(
+        24: sp.record(
             name="Illinois Avenue",
             category=Categories["property_e"],
             related_action=sp.set([
@@ -201,7 +212,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        26: sp.record(
+        25: sp.record(
             name="B. & O. utility",
             category=Categories["utility"],
             related_action=sp.set([
@@ -209,7 +220,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        27: sp.record(
+        26: sp.record(
             name="Atlantic Avenue",
             category=Categories["property_f"],
             related_action=sp.set([
@@ -217,7 +228,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        28: sp.record(
+        27: sp.record(
             name="Ventnor Avenue",
             category=Categories["property_f"],
             related_action=sp.set([
@@ -225,7 +236,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        29: sp.record(
+        28: sp.record(
             name="Water Works",
             category=Categories["utility"],
             related_action=sp.set([
@@ -233,7 +244,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        30: sp.record(
+        29: sp.record(
             name="Marvin Gardens",
             category=Categories["property_f"],
             related_action=sp.set([
@@ -241,12 +252,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        31: sp.record(
+        30: sp.record(
             name="go To jail",
             category=Categories["go_to_jail"],
             related_action=sp.set([sp.variant("land_on_go_to_jail", sp.unit)]),
         ),
-        32: sp.record(
+        31: sp.record(
             name="Pacific Avenue",
             category=Categories["property_g"],
             related_action=sp.set([
@@ -254,7 +265,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        33: sp.record(
+        32: sp.record(
             name="North Carolina Avenue",
             category=Categories["property_g"],
             related_action=sp.set([
@@ -262,12 +273,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        34: sp.record(
+        33: sp.record(
             name="Community Chest",
             category=Categories["community_chest"],
             related_action=sp.set([sp.variant("land_on_community_chest", sp.unit)]),
         ),
-        35: sp.record(
+        34: sp.record(
             name="Pennsylvania Avenue",
             category=Categories["property_g"],
             related_action=sp.set([
@@ -275,7 +286,7 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        36: sp.record(
+        35: sp.record(
             name="Short Line",
             category=Categories["utility"],
             related_action=sp.set([
@@ -283,12 +294,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        37: sp.record(
+        36: sp.record(
             name="chance",
             category=Categories["chance"],
             related_action=sp.set([sp.variant("land_on_chance", sp.unit)]),
         ),
-        38: sp.record(
+        37: sp.record(
             name="Park Place",
             category=Categories["property_h"],
             related_action=sp.set([
@@ -296,12 +307,12 @@ Spaces = sp.big_map(
                 sp.variant("land_on_owned_property", sp.unit),
             ]),
         ),
-        39: sp.record(
+        38: sp.record(
             name="Luxury tax",
             category=Categories["tax"],
             related_action=sp.set([sp.variant("land_on_tax_space", sp.unit)]),
         ),
-        40: sp.record(
+        39: sp.record(
             name="Boardwalk",
             category=Categories["property_h"],
             related_action=sp.set([
@@ -314,6 +325,6 @@ Spaces = sp.big_map(
     tvalue=sp.TRecord(
         name=sp.TString,
         category=sp.TString,
-        related_action=sp.TSet(GameActions.player_action_type),
+        related_action=sp.TSet(player_action_type),
     ),
 )

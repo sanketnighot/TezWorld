@@ -202,12 +202,7 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
         # TODO: Check if action aligns with the players position
         self.is_player(player_id)
         self.is_current_player(player_id)
-        sp.verify(
-            spaces[
-                self.data.player_ledger[player_id].current_position
-            ].related_action.contains(action),
-            Errors.InvalidAction,
-        )
+
         sp.verify(
             self.data.player_ledger[player_id].current_game_action
             == sp.variant("await_player_action", sp.unit),
@@ -215,20 +210,76 @@ class Dealer(GameActions.GameActions, Helpers.Helpers):
         )
         sp.set_type(action, GameActions.player_action_type)
         with sp.if_(action.is_variant("land_on_owned_property")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(
+                    sp.variant("land_on_owned_property", sp.unit)
+                ),
+                Errors.InvalidAction,
+            )
             self.land_on_owned_property(action)
         with sp.if_(action.is_variant("land_on_unowned_property")):
-            self.land_on_unowned_property(action)
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(
+                    sp.variant("land_on_unowned_property", sp.unit)
+                ),
+                Errors.InvalidAction,
+            )
+            self.land_on_unowned_property(
+                action, self.data.player_ledger[player_id].current_position
+            )
         with sp.if_(action.is_variant("land_on_go")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(sp.variant("land_on_go", sp.unit)),
+                Errors.InvalidAction,
+            )
             self.land_on_go(action)
         with sp.if_(action.is_variant("land_on_go_to_jail")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(sp.variant("land_on_go_to_jail", sp.unit)),
+                Errors.InvalidAction,
+            )
             self.land_on_go_to_jail(action)
         with sp.if_(action.is_variant("land_on_tax_space")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(sp.variant("land_on_tax_space", sp.unit)),
+                Errors.InvalidAction,
+            )
             self.land_on_tax_space(action)
         with sp.if_(action.is_variant("land_on_chance")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(sp.variant("land_on_chance", sp.unit)),
+                Errors.InvalidAction,
+            )
             self.land_on_chance(action)
         with sp.if_(action.is_variant("land_on_community_chest")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(
+                    sp.variant("land_on_community_chest", sp.unit)
+                ),
+                Errors.InvalidAction,
+            )
             self.land_on_community_chest(action)
         with sp.if_(action.is_variant("land_on_free_parking")):
+            sp.verify(
+                spaces[
+                    self.data.player_ledger[player_id].current_position
+                ].related_action.contains(sp.variant("land_on_free_parking", sp.unit)),
+                Errors.InvalidAction,
+            )
             self.land_on_free_parking(action)
         self.data.player_ledger[player_id].current_game_action = sp.variant(
             "await_player_action", sp.unit
